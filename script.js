@@ -7,18 +7,38 @@ const actions = document.getElementById("actions");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const theme = new Image();
-theme.src = "tema.png"; // tema fixo do sistema
+const CANVAS_SIZE = 1080;
 
-uploadBtn.addEventListener("click", () => {
-  uploadInput.click();
+// === IMAGENS ===
+const theme = new Image();
+theme.src = "tema.png";
+
+const defaultAvatar = new Image();
+defaultAvatar.src = "avatar.jpg";
+
+// === FUNÇÃO PARA DESENHAR IMAGEM BASE + TEMA ===
+function drawImageWithTheme(baseImage) {
+
+  ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  const size = Math.min(baseImage.width, baseImage.height);
+  const sx = (baseImage.width - size) / 2;
+  const sy = (baseImage.height - size) / 2;
+
+  ctx.drawImage(baseImage, sx, sy, size, size, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  ctx.drawImage(theme, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+}
+
+// === CARREGAR TEMA + AVATAR INICIAL ===
+Promise.all([
+  new Promise(resolve => theme.onload = resolve),
+  new Promise(resolve => defaultAvatar.onload = resolve)
+]).then(() => {
+  drawImageWithTheme(defaultAvatar);
 });
 
-changeBtn.addEventListener("click", () => {
-  uploadInput.value = "";
-  actions.style.display = "none";
-  uploadBtn.style.display = "inline-block";
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+// === UPLOAD ===
+uploadBtn.addEventListener("click", () => {
   uploadInput.click();
 });
 
@@ -30,28 +50,9 @@ uploadInput.addEventListener("change", function(event) {
 
   reader.onload = function(e) {
     const img = new Image();
+
     img.onload = function() {
-
-      // Limpar canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Redimensionar e cortar proporcionalmente (cover)
-      const size = Math.min(img.width, img.height);
-      const sx = (img.width - size) / 2;
-      const sy = (img.height - size) / 2;
-
-      ctx.drawImage(img, sx, sy, size, size, 0, 0, 1080, 1080);
-
-      // Aplicar tema por cima
-      theme.onload = function() {
-        ctx.drawImage(theme, 0, 0, 1080, 1080);
-      };
-
-      if (theme.complete) {
-        ctx.drawImage(theme, 0, 0, 1080, 1080);
-      }
-
-      // Mostrar botões
+      drawImageWithTheme(img);
       uploadBtn.style.display = "none";
       actions.style.display = "block";
     };
@@ -62,14 +63,18 @@ uploadInput.addEventListener("change", function(event) {
   reader.readAsDataURL(file);
 });
 
+// === TROCAR FOTO ===
+changeBtn.addEventListener("click", () => {
+  uploadInput.value = "";
+  drawImageWithTheme(defaultAvatar);
+  actions.style.display = "none";
+  uploadBtn.style.display = "inline-block";
+});
+
+// === DOWNLOAD ===
 downloadBtn.addEventListener("click", () => {
 
   canvas.toBlob(function(blob) {
-
-    if (!blob) {
-      alert("Erro ao gerar imagem.");
-      return;
-    }
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -79,11 +84,10 @@ downloadBtn.addEventListener("click", () => {
 
     document.body.appendChild(link);
     link.click();
-
     document.body.removeChild(link);
+
     URL.revokeObjectURL(url);
 
   }, "image/jpeg", 1.0);
 
 });
-
