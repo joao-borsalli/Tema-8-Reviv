@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Personalizar Foto de Perfil - 8 Reviv</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>Personalize sua foto para o 8º Reviv</h1>
+
+    <div class="preview-container">
+      <canvas id="canvas" width="1080" height="1080"></canvas>
+    </div>
+
+    <input type="file" id="upload" accept="image/*" hidden>
+
+    <button id="uploadBtn" class="primary">Selecionar Foto</button>
+
+    <div class="actions" id="actions">
+      <button id="downloadBtn" class="primary">Baixar Foto</button>
+      <button id="changeBtn" class="secondary">Trocar Foto</button>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
